@@ -20,7 +20,16 @@ export default function LoginPage() {
     setLoading(true)
     setError("")
 
+    console.log("[v0] Login attempt with email:", email)
+    console.log(
+      "[v0] Available demo users:",
+      DEMO_USERS.map((u) => ({ email: u.email, password: u.password })),
+    )
+
     const demoUser = DEMO_USERS.find((user) => user.email === email && user.password === password)
+
+    console.log("[v0] Demo user found:", demoUser ? "Yes" : "No")
+
     if (demoUser) {
       apiClient.setToken(demoUser.token)
       if (typeof window !== "undefined") {
