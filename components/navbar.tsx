@@ -1,18 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { Home, Ticket, LogOut, Bus, Menu, X } from "lucide-react"
+import { Home, Ticket, LogOut, Bus, Menu, X, User } from "lucide-react"
 import { apiClient } from "@/lib/api"
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [userName, setUserName] = useState("")
   const router = useRouter()
   const pathname = usePathname()
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const name = localStorage.getItem("user_name") || "User"
+      setUserName(name)
+    }
+  }, [])
+
   const handleLogout = () => {
     apiClient.clearToken()
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("user_name")
+      localStorage.removeItem("user_email")
+    }
     router.push("/login")
   }
 
@@ -50,6 +62,11 @@ export default function Navbar() {
               )
             })}
 
+            <div className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-[var(--color-text)]">
+              <User className="h-4 w-4" />
+              <span>{userName}</span>
+            </div>
+
             <button
               onClick={handleLogout}
               className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
@@ -64,6 +81,7 @@ export default function Navbar() {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2 rounded-lg text-[var(--color-text)] hover:bg-gray-100"
+              aria-label="Toggle menu"
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -74,6 +92,11 @@ export default function Navbar() {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <div className="space-y-2">
+              <div className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-[var(--color-text)] bg-gray-50 rounded-lg">
+                <User className="h-4 w-4" />
+                <span>{userName}</span>
+              </div>
+
               {navItems.map((item) => {
                 const Icon = item.icon
                 const isActive = pathname === item.href

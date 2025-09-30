@@ -6,7 +6,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Mail, Lock, Bus } from "lucide-react"
-import { apiClient } from "@/lib/api"
+import { apiClient, DEMO_USERS } from "@/lib/api"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -20,9 +20,13 @@ export default function LoginPage() {
     setLoading(true)
     setError("")
 
-    // Demo login check
-    if (email === "demo@example.com" && password === "password") {
-      apiClient.setToken("demo-token")
+    const demoUser = DEMO_USERS.find((user) => user.email === email && user.password === password)
+    if (demoUser) {
+      apiClient.setToken(demoUser.token)
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user_name", demoUser.name)
+        localStorage.setItem("user_email", demoUser.email)
+      }
       router.push("/dashboard")
       return
     }
@@ -32,6 +36,10 @@ export default function LoginPage() {
 
       if (response.data?.token) {
         apiClient.setToken(response.data.token)
+        if (typeof window !== "undefined" && response.data.user) {
+          localStorage.setItem("user_name", response.data.user.name)
+          localStorage.setItem("user_email", response.data.user.email)
+        }
         router.push("/dashboard")
       } else {
         setError(response.error || "Login failed")
